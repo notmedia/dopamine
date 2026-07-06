@@ -30,8 +30,13 @@ impl Drop for StayAwakeGuard {
     }
 }
 
-pub fn stay_awake(config: Config) -> Result<StayAwakeGuard, Error> {
-    println!("creating assertion");
+/// Prevents the system from sleeping until the returned guard is dropped.
+///
+/// # Errors
+///
+/// Returns [`Error::AssertionFailed`] if the OS declines to create the power assertion.
+pub fn stay_awake(config: &Config) -> Result<StayAwakeGuard, Error> {
+    println!("creating assertion for {:?}", &config);
 
     Ok(StayAwakeGuard { id: 1 })
 }

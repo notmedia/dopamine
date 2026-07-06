@@ -1,5 +1,6 @@
 mod cli;
 
+use std::thread;
 use std::time::Duration;
 
 use clap::Parser;
@@ -14,7 +15,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         timeout: args.timeout_ms.map(Duration::from_millis),
     };
 
-    dopamine_core::stay_awake(config)?;
+    let _guard = dopamine_core::stay_awake(&config)?;
+
+    match config.timeout {
+        Some(timeout) => thread::sleep(timeout),
+        None => loop {
+            thread::park();
+        },
+    }
 
     Ok(())
 }
