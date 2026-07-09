@@ -5,6 +5,7 @@ edition.workspace = true
 
 [dependencies]
 clap.workspace = true
+ctrlc.workspace = true
 dopamine-core = { version = "0.1.0", path = "../core" }
 
 [lints]

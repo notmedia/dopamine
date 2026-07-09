@@ -1,6 +1,6 @@
 mod cli;
 
-use std::thread;
+use std::sync::mpsc;
 use std::time::Duration;
 
 use clap::Parser;
@@ -17,11 +17,19 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let _guard = AwakeGuard::acquire(&config)?;
 
+    let (tx, rx) = mpsc::channel();
+
+    ctrlc::set_handler(move || {
+        let _ = tx.send(());
+    })?;
+
     match config.timeout {
-        Some(timeout) => thread::sleep(timeout),
-        None => loop {
-            thread::park();
-        },
+        Some(timeout) => {
+            let _ = rx.recv_timeout(timeout);
+        }
+        None => {
+            let _ = rx.recv();
+        }
     }
 
     Ok(())
