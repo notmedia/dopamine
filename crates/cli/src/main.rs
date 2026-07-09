@@ -15,7 +15,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         timeout: args.timeout_ms.map(Duration::from_millis),
     };
 
-    let _guard = AwakeGuard::new(&config)?;
+    let _guard = AwakeGuard::acquire(&config)?;
 
     match config.timeout {
         Some(timeout) => thread::sleep(timeout),

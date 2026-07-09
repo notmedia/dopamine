@@ -4,6 +4,9 @@ pub use error::Error;
 #[cfg(target_os = "macos")]
 mod macos;
 
+#[cfg(target_os = "macos")]
+use macos as platform;
+
 #[cfg(not(target_os = "macos"))]
 compile_error!("dopamine currently only supports macOS");
 
@@ -23,10 +26,9 @@ impl AwakeGuard {
     ///
     /// # Errors
     ///
-    /// Returns [`Error::AssertionFailed`] if the OS declines to create the
-    /// power assertion.
-    pub fn new(_config: &Config) -> Result<Self, Error> {
-        let id = macos::acquire("dopamine")?;
+    /// Returns [`Error::AssertionFailed`] if the OS declines to create the power assertion.
+    pub fn acquire(_config: &Config) -> Result<Self, Error> {
+        let id = platform::acquire("dopamine")?;
 
         Ok(AwakeGuard { id })
     }
@@ -34,6 +36,6 @@ impl AwakeGuard {
 
 impl Drop for AwakeGuard {
     fn drop(&mut self) {
-        let _ = macos::release(self.id);
+        let _ = platform::release(self.id);
     }
 }
