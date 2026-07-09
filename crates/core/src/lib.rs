@@ -14,29 +14,26 @@ pub struct Config {
     pub timeout: Option<Duration>,
 }
 
-pub struct StayAwakeGuard {
+pub struct AwakeGuard {
     id: u32,
 }
 
-impl Drop for StayAwakeGuard {
-    fn drop(&mut self) {
-        macos::release(self.id).unwrap();
+impl AwakeGuard {
+    /// Prevents the system from sleeping until the returned guard is dropped.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::AssertionFailed`] if the OS declines to create the
+    /// power assertion.
+    pub fn new(_config: &Config) -> Result<Self, Error> {
+        let id = macos::acquire("dopamine")?;
+
+        Ok(AwakeGuard { id })
     }
 }
 
-/// Prevents the system from sleeping until the returned guard is dropped.
-///
-/// # Errors
-///
-/// Returns [`Error::AssertionFailed`] if the OS declines to create the power
-/// assertion.
-///
-/// # Panics
-/// If can't acquire
-pub fn stay_awake(config: &Config) -> Result<StayAwakeGuard, Error> {
-    println!("creating assertion for {:?}", &config);
-
-    let id = macos::acquire("dopamine").unwrap();
-
-    Ok(StayAwakeGuard { id })
+impl Drop for AwakeGuard {
+    fn drop(&mut self) {
+        let _ = macos::release(self.id);
+    }
 }
