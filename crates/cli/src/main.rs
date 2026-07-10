@@ -12,7 +12,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Cli::parse();
 
     let config = Config {
-        timeout: args.timeout_ms.map(Duration::from_millis),
+        timeout: args.timeout_ms.map(Duration::from_secs),
     };
 
     let _guard = AwakeGuard::acquire(&config)?;
