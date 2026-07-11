@@ -14,7 +14,7 @@ use macos as platform;
 compile_error!("dopamine currently only supports macOS");
 
 pub struct AwakeGuard {
-    id: u32,
+    _token: platform::Token,
 }
 
 impl AwakeGuard {
@@ -22,17 +22,19 @@ impl AwakeGuard {
     ///
     /// # Errors
     ///
-    /// Returns [`Error::AssertionFailure`] if the OS declines to create the
-    /// power assertion.
-    pub fn acquire(_config: &Config) -> Result<Self, Error> {
-        let id = platform::acquire("dopamine")?;
+    /// Returns [`Error::InvalidConfig`] if `config` requests no assertions
+    /// (both `idle` and `display` are `false`).
+    ///
+    /// Returns [`Error::AssertionFailure`] if the OS declines to create a
+    /// power assertion. If several assertions were requested and one fails,
+    /// any already created are released before the error is returned.
+    pub fn acquire(config: &Config) -> Result<Self, Error> {
+        if !config.idle && !config.display {
+            return Err(Error::InvalidConfig("no assertions passed".into()));
+        }
 
-        Ok(AwakeGuard { id })
-    }
-}
+        let token = platform::acquire("dopamine", config)?;
 
-impl Drop for AwakeGuard {
-    fn drop(&mut self) {
-        let _ = platform::release(self.id);
+        Ok(AwakeGuard { _token: token })
     }
 }

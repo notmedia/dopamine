@@ -2,7 +2,7 @@ mod cf;
 
 use cf::{CFStringRef, CfString, CfStringError};
 
-use crate::Error;
+use crate::{Config, Error};
 
 #[link(name = "IOKit", kind = "framework")]
 unsafe extern "C" {
@@ -17,7 +17,21 @@ unsafe extern "C" {
 }
 
 const K_IOPM_ASSERTION_LEVEL_ON: u32 = 255;
-const ASSERTION_TYPE: &str = "PreventUserIdleSystemSleep";
+
+#[derive(Clone, Copy)]
+enum AssertionType {
+    Idle,
+    Display,
+}
+
+impl AssertionType {
+    fn as_str(self) -> &'static str {
+        match self {
+            AssertionType::Idle => "PreventUserIdleSystemSleep",
+            AssertionType::Display => "PreventUserIdleDisplaySleep",
+        }
+    }
+}
 
 impl From<CfStringError> for Error {
     fn from(err: CfStringError) -> Self {
@@ -28,9 +42,35 @@ impl From<CfStringError> for Error {
     }
 }
 
-pub(crate) fn acquire(name: &str) -> Result<u32, Error> {
+pub(crate) struct Assertion {
+    id: u32,
+}
+
+pub(crate) type Token = Vec<Assertion>;
+
+impl Drop for Assertion {
+    fn drop(&mut self) {
+        unsafe { IOPMAssertionRelease(self.id) };
+    }
+}
+
+pub(crate) fn acquire(name: &str, config: &Config) -> Result<Token, Error> {
+    let mut assertions: Token = vec![];
+
+    if config.idle {
+        assertions.push(acquire_one(name, AssertionType::Idle)?);
+    }
+
+    if config.display {
+        assertions.push(acquire_one(name, AssertionType::Display)?);
+    }
+
+    Ok(assertions)
+}
+
+fn acquire_one(name: &str, assertion_type: AssertionType) -> Result<Assertion, Error> {
     let cf_name = CfString::new(name)?;
-    let cf_type = CfString::new(ASSERTION_TYPE)?;
+    let cf_type = CfString::new(assertion_type.as_str())?;
 
     let mut assertion_id: u32 = 0;
 
@@ -49,17 +89,5 @@ pub(crate) fn acquire(name: &str) -> Result<u32, Error> {
         )));
     }
 
-    Ok(assertion_id)
-}
-
-pub(crate) fn release(id: u32) -> Result<(), Error> {
-    let result = unsafe { IOPMAssertionRelease(id) };
-
-    if result != 0 {
-        return Err(Error::AssertionFailure(format!(
-            "assertion release failed with error code {result:#x}"
-        )));
-    }
-
-    Ok(())
+    Ok(Assertion { id: assertion_id })
 }
