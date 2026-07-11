@@ -1,6 +1,6 @@
 mod cf;
 
-use cf::{CFStringRef, CfString};
+use cf::{CFStringRef, CfString, CfStringError};
 
 use crate::Error;
 
@@ -18,6 +18,15 @@ unsafe extern "C" {
 
 const K_IOPM_ASSERTION_LEVEL_ON: u32 = 255;
 const ASSERTION_TYPE: &str = "PreventUserIdleSystemSleep";
+
+impl From<CfStringError> for Error {
+    fn from(err: CfStringError) -> Self {
+        match err {
+            CfStringError::NulByte(e) => Error::InvalidName(e),
+            CfStringError::CreationFailed => Error::AssertionFailure(err.to_string()),
+        }
+    }
+}
 
 pub(crate) fn acquire(name: &str) -> Result<u32, Error> {
     let cf_name = CfString::new(name)?;

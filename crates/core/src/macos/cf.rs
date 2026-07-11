@@ -1,7 +1,5 @@
 // Core Foundation
-use std::ffi::{CString, c_char, c_void};
-
-use crate::Error;
+use std::ffi::{CString, NulError, c_char, c_void};
 
 const K_CFSTRING_ENCODING_UTF8: u32 = 0x0800_0100;
 
@@ -23,21 +21,48 @@ unsafe extern "C" {
     fn CFRelease(cf: *const c_void);
 }
 
+#[derive(Debug)]
+pub(super) enum CfStringError {
+    NulByte(NulError),
+    CreationFailed,
+}
+
+impl std::error::Error for CfStringError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            CfStringError::NulByte(err) => Some(err),
+            CfStringError::CreationFailed => None,
+        }
+    }
+}
+
+impl std::fmt::Display for CfStringError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            CfStringError::NulByte(_) => write!(f, "failed to convert to a C string"),
+            CfStringError::CreationFailed => write!(f, "CFStringCreateWithCString returned null"),
+        }
+    }
+}
+
+impl From<NulError> for CfStringError {
+    fn from(err: NulError) -> Self {
+        CfStringError::NulByte(err)
+    }
+}
+
 pub(super) struct CfString(CFStringRef);
 
 impl CfString {
-    pub(super) fn new(s: &str) -> Result<Self, Error> {
-        let cstr = CString::new(s)
-            .map_err(|_| Error::AssertionFailure("assertion name contains a NUL byte".into()))?;
+    pub(super) fn new(s: &str) -> Result<Self, CfStringError> {
+        let cstr = CString::new(s)?;
 
         let cf_str = unsafe {
             CFStringCreateWithCString(std::ptr::null(), cstr.as_ptr(), K_CFSTRING_ENCODING_UTF8)
         };
 
         if cf_str.is_null() {
-            return Err(Error::AssertionFailure(
-                "CFStringCreateWithCString returned null".into(),
-            ));
+            return Err(CfStringError::CreationFailed);
         }
 
         Ok(Self(cf_str))
