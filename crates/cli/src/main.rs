@@ -4,16 +4,15 @@ use std::sync::mpsc;
 use std::time::Duration;
 
 use clap::Parser;
-use dopamine_core::{AwakeGuard, Config};
+use dopamine_core::AwakeGuard;
 
 use crate::cli::Cli;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Cli::parse();
 
-    let config = Config {
-        timeout: args.timeout_ms.map(Duration::from_secs),
-    };
+    let timeout = args.timeout.map(Duration::from_secs);
+    let config = args.into_config();
 
     let _guard = AwakeGuard::acquire(&config)?;
 
@@ -23,7 +22,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let _ = tx.send(());
     })?;
 
-    match config.timeout {
+    match timeout {
         Some(timeout) => {
             let _ = rx.recv_timeout(timeout);
         }

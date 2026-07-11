@@ -1,5 +1,8 @@
 mod error;
+mod config;
+
 pub use error::Error;
+pub use config::Config;
 
 #[cfg(target_os = "macos")]
 mod macos;
@@ -10,13 +13,6 @@ use macos as platform;
 #[cfg(not(target_os = "macos"))]
 compile_error!("dopamine currently only supports macOS");
 
-use std::time::Duration;
-
-#[derive(Debug)]
-pub struct Config {
-    pub timeout: Option<Duration>,
-}
-
 pub struct AwakeGuard {
     id: u32,
 }
@@ -26,7 +22,8 @@ impl AwakeGuard {
     ///
     /// # Errors
     ///
-    /// Returns [`Error::AssertionFailed`] if the OS declines to create the power assertion.
+    /// Returns [`Error::AssertionFailed`] if the OS declines to create the
+    /// power assertion.
     pub fn acquire(_config: &Config) -> Result<Self, Error> {
         let id = platform::acquire("dopamine")?;
 

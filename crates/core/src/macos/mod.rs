@@ -35,7 +35,7 @@ pub(crate) fn acquire(name: &str) -> Result<u32, Error> {
     };
 
     if result != 0 {
-        return Err(Error::AssertionFailed(format!(
+        return Err(Error::AssertionFailure(format!(
             "assertion create failed with error code {result:#x}"
         )));
     }
@@ -47,7 +47,7 @@ pub(crate) fn release(id: u32) -> Result<(), Error> {
     let result = unsafe { IOPMAssertionRelease(id) };
 
     if result != 0 {
-        return Err(Error::AssertionFailed(format!(
+        return Err(Error::AssertionFailure(format!(
             "assertion release failed with error code {result:#x}"
         )));
     }
