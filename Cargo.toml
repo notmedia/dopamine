@@ -6,6 +6,8 @@ members = ['crates/*']
 edition = "2024"
 
 [workspace.dependencies]
+dopamine-core = { version = "0.1.0", path = "./crates/core" }
+
 clap = { version = "4", features = ["derive"] }
 ctrlc = { version = "3", features = ["termination"] }
 
