@@ -1,13 +1,13 @@
 # dopamine
 
-A tiny macOS [`caffeinate`](https://ss64.com/mac/caffeinate.html) alternative written in Rust. Keeps your Mac awake exactly as long as you ask — and not a second longer.
+A tiny macOS [`caffeinate`](https://ss64.com/mac/caffeinate.html) alternative written in Rust. Keeps your Mac awake exactly as long as you ask.
 
 ## Usage
 
 ```sh
 dop                 # prevent idle sleep until Ctrl-C
-dop -d              # also keep the display awake
-dop -i -d -t 1h30m  # both assertions, released after 1.5 hours
+dop -d              # keep the display awake
+dop -id -t 1h30m    # both assertions, released after 1.5 hours
 dop -t 20m          # idle sleep prevented for 20 minutes
 ```
 
