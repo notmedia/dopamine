@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ['crates/*', 'ui/src-tauri']
+members = ['crates/*']
 
 [workspace.package]
 edition = "2024"
@@ -10,6 +10,7 @@ dopamine-core = { version = "0.1.0", path = "./crates/core" }
 
 clap = { version = "4", features = ["derive"] }
 ctrlc = { version = "3", features = ["termination"] }
+duration-str = "0.21.0"
 
 [workspace.lints.clippy]
 all = "warn"

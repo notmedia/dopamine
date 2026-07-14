@@ -1,5 +1,12 @@
+use std::time::Duration;
+
 use clap::Parser;
 use dopamine_core::Config;
+
+
+fn parse_duration(s: &str) -> Result<Duration, String> {
+    duration_str::parse(s)
+}
 
 #[derive(Parser)]
 #[command(version, about)]
@@ -12,9 +19,9 @@ pub struct Cli {
     #[arg(short, long)]
     pub display: bool,
 
-    /// Timeout in seconds for which this assertion has to be valid.
-    #[arg(short, long)]
-    pub timeout: Option<u64>,
+    /// How long to stay awake, e.g. "30s", "5m", "1h30m". Forever if omitted.
+    #[arg(short, long, value_parser = parse_duration)]
+    pub timeout: Option<Duration>,
 }
 
 impl Cli {

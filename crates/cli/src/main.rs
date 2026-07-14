@@ -1,7 +1,6 @@
 mod cli;
 
 use std::sync::mpsc;
-use std::time::Duration;
 
 use clap::Parser;
 use dopamine_core::AwakeGuard;
@@ -11,7 +10,7 @@ use crate::cli::Cli;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Cli::parse();
 
-    let timeout = args.timeout.map(Duration::from_secs);
+    let timeout = args.timeout;
     let config = args.into_config();
 
     let _guard = AwakeGuard::acquire(&config)?;
