@@ -3,7 +3,6 @@ use std::time::Duration;
 use clap::Parser;
 use dopamine_core::Config;
 
-
 fn parse_duration(s: &str) -> Result<Duration, String> {
     duration_str::parse(s)
 }
@@ -22,6 +21,11 @@ pub struct Cli {
     /// How long to stay awake, e.g. "30s", "5m", "1h30m". Forever if omitted.
     #[arg(short, long, value_parser = parse_duration)]
     pub timeout: Option<Duration>,
+
+    /// Wait for the process with the specified pid to exit.
+    /// Once the process exits, the assertion is also released.
+    #[arg(short, long)]
+    pub pid: Option<i32>,
 }
 
 impl Cli {
@@ -47,6 +51,7 @@ mod tests {
             idle: false,
             display: false,
             timeout: None,
+            pid: None,
         }
         .into_config();
 
@@ -56,6 +61,7 @@ mod tests {
             idle: false,
             display: true,
             timeout: None,
+            pid: None,
         }
         .into_config();
 

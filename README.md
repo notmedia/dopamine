@@ -5,10 +5,11 @@ A tiny macOS [`caffeinate`](https://ss64.com/mac/caffeinate.html) alternative wr
 ## Usage
 
 ```sh
-dop                 # prevent idle sleep until Ctrl-C
-dop -d              # keep the display awake
-dop -id -t 1h30m    # both assertions, released after 1.5 hours
-dop -t 20m          # idle sleep prevented for 20 minutes
+dop                        # prevent idle sleep until Ctrl-C
+dop -d                     # keep the display awake
+dop -id -t 1h30m           # both assertions, released after 1.5 hours
+dop -t 20m                 # idle sleep prevented for 20 minutes
+dop -p $(pgrep -n make)    # stay awake while that process is running
 ```
 
 | Flag | Meaning |
@@ -16,8 +17,9 @@ dop -t 20m          # idle sleep prevented for 20 minutes
 | `-i`, `--idle` | Prevent system idle sleep (default when no flags are given) |
 | `-d`, `--display` | Prevent the display from sleeping |
 | `-t`, `--timeout` | How long to stay awake — human-friendly strings like `30s`, `5m`, `1h30m`. Forever if omitted |
+| `-p`, `--pid` | Stay awake while the process with this PID is alive; release and exit once it dies |
 
-`dop` releases its power assertions on any exit: timeout, Ctrl-C, `SIGTERM`, or `SIGHUP`.
+`dop` releases its power assertions on any exit: timeout, watched process exiting, Ctrl-C, `SIGTERM`, or `SIGHUP`. The flags compose — with `-p` and `-t` together, whichever fires first ends the wait.
 
 To see the assertions live while `dop` runs:
 

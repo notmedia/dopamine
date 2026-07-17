@@ -1,5 +1,6 @@
 mod config;
 mod error;
+pub mod process;
 
 pub use config::Config;
 pub use error::Error;
