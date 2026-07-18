@@ -45,8 +45,24 @@ impl Cli {
 mod tests {
     use clap::CommandFactory;
 
-use super::*;
+    use super::*;
 
+    mod parse_duration {
+        use std::time::Duration;
+
+        #[test]
+        fn parses_valid_string() {
+            assert_eq!(
+                super::parse_duration("1d3h5m"),
+                Ok(Duration::from_hours(27) + Duration::from_mins(5))
+            );
+        }
+
+        #[test]
+        fn rejects_invalid_string() {
+            assert!(super::parse_duration("91sj12").is_err());
+        }
+    }
     #[test]
     fn verify_cli() {
         Cli::command().debug_assert();
