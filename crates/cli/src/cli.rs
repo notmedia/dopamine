@@ -24,7 +24,7 @@ pub struct Cli {
 
     /// Wait for the process with the specified pid to exit.
     /// Once the process exits, the assertion is also released.
-    #[arg(short, long)]
+    #[arg(short, long, value_parser = clap::value_parser!(i32).range(1..))]
     pub pid: Option<i32>,
 }
 
@@ -43,7 +43,14 @@ impl Cli {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use clap::CommandFactory;
+
+use super::*;
+
+    #[test]
+    fn verify_cli() {
+        Cli::command().debug_assert();
+    }
 
     #[test]
     fn config_conversion_with_default() {

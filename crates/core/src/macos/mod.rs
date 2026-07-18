@@ -1,5 +1,7 @@
 mod cf;
 
+use std::ffi::c_int;
+
 use cf::{CFStringRef, CfString, CfStringError};
 
 use crate::{Config, Error};
@@ -11,9 +13,9 @@ unsafe extern "C" {
         assertion_level: u32,
         assertion_name: CFStringRef,
         assertion_id: *mut u32,
-    ) -> i32;
+    ) -> c_int;
 
-    fn IOPMAssertionRelease(assertion_id: u32) -> i32;
+    fn IOPMAssertionRelease(assertion_id: u32) -> c_int;
 }
 
 const K_IOPM_ASSERTION_LEVEL_ON: u32 = 255;

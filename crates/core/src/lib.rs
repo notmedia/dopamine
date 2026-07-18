@@ -1,9 +1,7 @@
 mod config;
 mod error;
+#[cfg(unix)]
 pub mod process;
-
-pub use config::Config;
-pub use error::Error;
 
 #[cfg(target_os = "macos")]
 mod macos;
@@ -13,6 +11,9 @@ use macos as platform;
 
 #[cfg(not(target_os = "macos"))]
 compile_error!("dopamine currently only supports macOS");
+
+pub use config::Config;
+pub use error::Error;
 
 pub struct AwakeGuard {
     _token: platform::Token,

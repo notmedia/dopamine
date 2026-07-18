@@ -1,11 +1,9 @@
 use std::ffi::c_int;
 
-#[cfg(unix)]
 unsafe extern "C" {
     fn kill(pid: c_int, sig: c_int) -> c_int;
 }
 
-#[cfg(unix)]
 #[must_use]
 pub fn is_alive(pid: i32) -> bool {
     const EPERM: c_int = 1;
