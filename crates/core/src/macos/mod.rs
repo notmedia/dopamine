@@ -44,6 +44,7 @@ impl From<CfStringError> for Error {
     }
 }
 
+#[derive(Debug)]
 pub(crate) struct Assertion {
     id: u32,
 }

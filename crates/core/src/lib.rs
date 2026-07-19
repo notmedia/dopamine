@@ -15,6 +15,7 @@ compile_error!("dopamine currently only supports macOS");
 pub use config::Config;
 pub use error::Error;
 
+#[derive(Debug)]
 pub struct AwakeGuard {
     _token: platform::Token,
 }
